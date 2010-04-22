@@ -17,8 +17,8 @@ module HealthMonitor
       sql||= begin
         order_sql = if options[:order]
           options[:order]
-        elsif options[:cast] || 
-          (!ActiveRecord::Base.timestamped_migrations && ActiveRecord::Base.connection.is_a?(ActiveRecord::ConnectionAdapters::MysqlAdapter))
+        elsif options[:cast] ||
+          (!ActiveRecord::Base.timestamped_migrations && ActiveRecord::Base.connection.adapter_name.downcase == "mysql")
           "CAST(version as unsigned) DESC"
         else
           "version DESC"
@@ -27,7 +27,7 @@ module HealthMonitor
 
         options[:sql] || "select version from #{table} order by #{order_sql} LIMIT 1"
       end
-      
+
       version    = ActiveRecord::Base.connection.select_value( sql )
 
       {
